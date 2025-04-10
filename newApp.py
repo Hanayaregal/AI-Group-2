@@ -1,7 +1,5 @@
-
 import streamlit as st
 import pandas as pd
-import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -90,70 +88,72 @@ model = RandomForestRegressor(random_state=34)
 model.fit(X_train, y_train)
 
 # ----------------------------
-# 🌐 Streamlit UI
+# 🌐 Streamlit UI for Batch Prediction
 # ----------------------------
 st.title("📚 Student Performance Predictor")
-st.markdown("Predict the final grade based on student information")
+st.markdown("Upload a CSV file of student details to predict grades")
 
-with st.form("prediction_form"):
-    col1, col2 = st.columns(2)
+# Example format download
+with st.expander("📄 See required CSV format"):
+    st.markdown("""
+    **Required columns in the CSV file:**
 
-    with col1:
-        student_age = st.number_input("Student Age", 17, 30, 20)
-        sex = st.selectbox("Sex", ['Male', 'Female'])
-        high_school_type = st.selectbox("High School Type", ['Public', 'Private'])
-        scholarship = st.selectbox("Scholarship", [50, 75, 100])
-        additional_work = st.selectbox("Additional Work", ['Yes', 'No'])
-        sports_activity = st.selectbox("Sports Activity", ['Yes', 'No'])
+    - Student_ID  
+    - Student_Age  
+    - Sex  
+    - High_School_Type  
+    - Scholarship  
+    - Additional_Work  
+    - Sports_activity  
+    - Transportation  
+    - Weekly_Study_Hours  
+    - Attendance  
+    - Reading  
+    - Notes  
+    - Listening_in_Class  
+    - Project_work  
+    """)
 
-    with col2:
-        transportation = st.selectbox("Transportation", ['Private', 'Bus'])
-        weekly_study_hours = st.slider("Weekly Study Hours", 0.0, 40.0, 10.0)
-        attendance = st.selectbox("Attendance Score", [1.0, 2.0, 3.0])
-        reading = st.selectbox("Reading Score", ['Yes', 'No'])
-        notes = st.selectbox("Notes Score", [1.0, 0.0])
-        listening_in_class = st.selectbox("Listening in Class", [1.0, 0.0])
-        project_work = st.selectbox("Project Work", [1.0, 0.0])
+uploaded_file = st.file_uploader("Upload CSV file", type=["csv"])
 
-    submit = st.form_submit_button("Predict Grade")
+if uploaded_file is not None:
+    try:
+        # Read the uploaded CSV file
+        input_df = pd.read_csv(uploaded_file)
 
-if submit:
-    input_data = {
-        'Student_Age': student_age,
-        'Sex': sex,
-        'High_School_Type': high_school_type,
-        'Scholarship': scholarship,
-        'Additional_Work': additional_work,
-        'Sports_activity': sports_activity,
-        'Transportation': transportation,
-        'Weekly_Study_Hours': weekly_study_hours,
-        'Attendance': attendance,
-        'Reading': reading,
-        'Notes': notes,
-        'Listening_in_Class': listening_in_class,
-        'Project_work': project_work
-    }
+        # Display CSV data preview
+        st.write("CSV Data Preview:")
+        st.dataframe(input_df)  # This will display the first few rows of the uploaded file
 
-    input_df = pd.DataFrame([input_data])
+        # Encode categorical inputs
+        for col in input_df.columns:
+            if col in label_encoders:
+                encoder = label_encoders[col]
+                try:
+                    input_df[col] = encoder.transform(input_df[col])
+                except ValueError:
+                    input_df[col] = input_df[col].apply(
+                        lambda x: encoder.transform([encoder.classes_[0]])[0]
+                        if x not in encoder.classes_ else encoder.transform([x])[0]
+                    )
 
-    # Encode input
-    for col in input_df.columns:
-        if col in label_encoders:
-            encoder = label_encoders[col]
-            try:
-                input_df[col] = encoder.transform(input_df[col])
-            except ValueError:
-                input_df[col] = input_df[col].apply(
-                    lambda x: encoder.transform([encoder.classes_[0]])[0]
-                    if x not in encoder.classes_ else encoder.transform([x])[0]
-                )
+        input_df = input_df[feature_columns]
 
-    input_df = input_df[X.columns]
+        # Predict grades
+        predicted_numeric = model.predict(input_df)
+        predicted_letters = [convert_numeric_to_letter(score) for score in predicted_numeric]
 
-    # Predict
-    pred_numeric = model.predict(input_df)[0]
-    pred_letter = convert_numeric_to_letter(pred_numeric)
+        # Show results
+        result_df = pd.read_csv(uploaded_file)
+        result_df['Predicted Numeric Grade'] = predicted_numeric
+        result_df['Predicted Letter Grade'] = predicted_letters
 
-    st.success(f"🎯 Predicted Grade: **{pred_numeric:.2f} ➝ {pred_letter}**")
+        st.success("✅ Predictions complete!")
+        st.dataframe(result_df)
 
+        # Downloadable results
+        csv = result_df.to_csv(index=False).encode('utf-8')
+        st.download_button("📥 Download Results", csv, file_name="predicted_grades.csv", mime='text/csv')
 
+    except Exception as e:
+        st.error(f"❌ Error: {e}")
