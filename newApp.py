@@ -12,7 +12,7 @@ def map_grade_letter_to_numeric(letter):
         "F": 0.0, "D": 1.0, "C-": 1.75, "C": 2.0, "C+": 2.5,
         "B-": 2.75, "B": 3.0, "B+": 3.5, "A-": 3.75, "A": 4.0, "A+": 4.1, "AA": 4.0
     }
-    return mapping.get(letter.upper(), 0.0)
+    return mapping.get(str(letter).upper(), 0.0)
 
 def convert_numeric_to_letter(grade):
     if grade < 1.0:
@@ -39,13 +39,24 @@ def convert_numeric_to_letter(grade):
         return "A+"
 
 # ----------------------------
+# 🔁 Age Conversion Helper
+# ----------------------------
+def convert_age(age_value):
+    if '-' in str(age_value):
+        parts = age_value.split('-')
+        return (float(parts[0]) + float(parts[1])) / 2
+    try:
+        return float(age_value)
+    except:
+        return None
+
+# ----------------------------
 # 📥 Load and Preprocess Data
 # ----------------------------
 data = pd.read_csv("Students _Performance _Prediction.csv")
 
-# Clean and convert columns
-data['Scholarship'] = data['Scholarship'].str.replace('%', '').astype(float)
-data['Student_Age'] = data['Student_Age'].replace({"18": 18, "19-22": 20.5}).astype(float)
+data['Scholarship'] = data['Scholarship'].str.replace('%', '', regex=False).astype(float)
+data['Student_Age'] = data['Student_Age'].apply(convert_age)
 data['Grade'] = data['Grade'].apply(map_grade_letter_to_numeric)
 
 # Encode categoricals
@@ -80,8 +91,8 @@ if uploaded_file:
     try:
         input_df = pd.read_csv(uploaded_file)
 
-        input_df['Scholarship'] = input_df['Scholarship'].str.replace('%', '').astype(float)
-        input_df['Student_Age'] = input_df['Student_Age'].replace({"18": 18, "19-22": 20.5}).astype(float)
+        input_df['Scholarship'] = input_df['Scholarship'].str.replace('%', '', regex=False).astype(float)
+        input_df['Student_Age'] = input_df['Student_Age'].apply(convert_age)
 
         for col in input_df.columns:
             if col in label_encoders:
