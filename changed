@@ -1,0 +1,84 @@
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import LabelEncoder
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the dataset (example using a common student performance dataset)
+# You can replace this with your own dataset
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00320/student.zip"
+# Or use a local file: df = pd.read_csv('student_data.csv')
+
+# For this example, we'll create a synthetic dataset if the URL fails
+try:
+    df = pd.read_csv(url)
+except:
+    print("Using synthetic data as couldn't fetch from URL")
+    np.random.seed(42)
+    data = {
+        'study_hours': np.random.randint(1, 10, 100),
+        'attendance': np.random.randint(60, 100, 100),
+        'extracurricular': np.random.choice(['yes', 'no'], 100),
+        'previous_scores': np.random.randint(50, 95, 100),
+        'family_support': np.random.choice(['yes', 'no'], 100),
+        'performance': np.random.choice(['poor', 'average', 'good', 'excellent'], 100)
+    }
+    df = pd.DataFrame(data)
+
+# Data Preprocessing
+# Encode categorical variables
+label_encoders = {}
+categorical_cols = ['extracurricular', 'family_support', 'performance']
+for col in categorical_cols:
+    le = LabelEncoder()
+    df[col] = le.fit_transform(df[col])
+    label_encoders[col] = le
+
+# Feature selection (adjust according to your dataset)
+X = df.drop('performance', axis=1)  # Features
+y = df['performance']  # Target variable
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Initialize and train the model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy:.2f}")
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred, target_names=label_encoders['performance'].classes_))
+
+# Feature importance visualization
+feature_importance = pd.Series(model.feature_importances_, index=X.columns)
+plt.figure(figsize=(10, 6))
+feature_importance.sort_values().plot(kind='barh')
+plt.title('Feature Importance')
+plt.show()
+
+# Example prediction for a new student
+new_student = {
+    'study_hours': 5,
+    'attendance': 90,
+    'extracurricular': 'yes',
+    'previous_scores': 85,
+    'family_support': 'yes'
+}
+
+# Preprocess the new student data
+new_df = pd.DataFrame([new_student])
+for col in ['extracurricular', 'family_support']:
+    new_df[col] = label_encoders[col].transform(new_df[col])
+
+prediction = model.predict(new_df)
+predicted_performance = label_encoders['performance'].inverse_transform(prediction)
+print(f"\nPredicted Performance for New Student: {predicted_performance[0]}")
