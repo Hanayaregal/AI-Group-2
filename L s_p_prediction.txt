@@ -1,0 +1,7 @@
+ # Load the data
+ df = pd.read_csv('student_data.csv')
+ 
+ # Data Cleaning
+ # Fix known data entry errors
+ df['Notes'] = df['Notes'].replace('6', np.nan)  # Handle invalid '6' entries
+ df['Notes'] = df['Notes'].fillna(df['Notes'].mode()[0]
