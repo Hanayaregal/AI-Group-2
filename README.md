@@ -24,14 +24,20 @@ Grade: Final academic grade (AA, BA, BB, CB, CC, DC, DD, Fail)
 student-performance-prediction/
 
 ├── data/
-│ └── student_performance.csv # Raw dataset
+│ 
+└── student_performance.csv # Raw dataset
 ├── notebooks/
-│ └── Student_Performance_Analysis.ipynb # Jupyter notebook with analysis
+│ 
+└── Student_Performance_Analysis.ipynb # Jupyter notebook with analysis
 ├── src/
-│ ├── preprocess.py # Data preprocessing script
-│ ├── train_model.py # Model training script
-│ └── predict.py # Prediction script
+│
+├── preprocess.py # Data preprocessing script
+│ 
+├── train_model.py # Model training script
+│
+└── predict.py # Prediction script
 ├── models/
-│ └── random_forest_model.pkl # Trained model
+│
+└── random_forest_model.pkl # Trained model
 ├── README.md # This file
 └── requirements.txt # Python dependencies
