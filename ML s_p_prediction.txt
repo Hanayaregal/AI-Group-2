@@ -1,0 +1,58 @@
+# Preprocessing
+ # Define categorical and numerical features
+ categorical_features = ['Sex', 'High_School_Type', 'Additional_Work', 
+                        'Sports_activity', 'Transportation', 'Attendance',
+                        'Reading', 'Notes', 'Listening_in_Class', 'Project_work']
+ 
+ numerical_features = ['Student_Age', 'Scholarship', 'Weekly_Study_Hours']
+ 
+ # Create preprocessing pipeline
+ preprocessor = ColumnTransformer(
+     transformers=[
+         ('num', 'passthrough', numerical_features),
+         ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_features)
+     ])
+ 
+ # Define target variable
+ y = df['Grade']
+ X = df.drop(['Grade', 'Student_ID'], axis=1)  # Remove non-predictive columns
+ 
+ # Split data
+ X_train, X_test, y_train, y_test = train_test_split(
+     X, y, test_size=0.2, random_state=42)
+ 
+ # Create pipeline with preprocessing and model
+ model = Pipeline(steps=[
+     ('preprocessor', preprocessor),
+     ('classifier', RandomForestClassifier(n_estimators=100, random_state=42))
+ ])
+ 
+ # Train model
+ model.fit(X_train, y_train)
+ 
+ # Evaluate model
+ y_pred = model.predict(X_test)
+ print("\nModel Accuracy:", accuracy_score(y_test, y_pred))
+ print("\nClassification Report:")
+ print(classification_report(y_test, y_pred))
+ 
+ # Feature Importance
+ # Get feature names after one-hot encoding
+ feature_names = numerical_features + \
+     list(model.named_steps['preprocessor'].named_transformers_['cat']\
+         .get_feature_names_out(categorical_features))
+ 
+ # Get feature importances
+ importances = model.named_steps['classifier'].feature_importances_
+ 
+ # Create DataFrame for visualization
+ feature_importances = pd.DataFrame({
+     'Feature': feature_names,
+     'Importance': importances
+ }).sort_values('Importance', ascending=False)
+ 
+ # Plot top 20 features
+ plt.figure(figsize=(12, 8))
+ sns.barplot(x='Importance', y='Feature', data=feature_importances.head(20))
+ plt.title('Top 20 Important Features')
+ plt.show()
