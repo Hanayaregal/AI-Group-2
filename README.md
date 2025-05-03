@@ -1,9 +1,9 @@
-Student Performance Prediction
+##Student Performance Prediction
+
 This project analyzes student performance data and builds a machine learning model to predict academic grades based on various student characteristics and behaviors.
 
-Dataset Overview
+##Dataset Overview
 The dataset contains information about 145 students with the following attributes:
-
 Student_ID: Unique identifier for each student
 Student_Age: Age group of the student (18, 19-22, 23-27)
 Sex: Gender of the student (Male/Female)
@@ -19,3 +19,18 @@ Notes: Whether the student takes notes (Yes/No)
 Listening_in_Class: Attention level in class (Yes/No)
 Project_work: Participation in project work (Yes/No)
 Grade: Final academic grade (AA, BA, BB, CB, CC, DC, DD, Fail)
+
+## Project Structure
+student-performance-prediction/
+├── data/
+│ └── student_performance.csv # Raw dataset
+├── notebooks/
+│ └── Student_Performance_Analysis.ipynb # Jupyter notebook with analysis
+├── src/
+│ ├── preprocess.py # Data preprocessing script
+│ ├── train_model.py # Model training script
+│ └── predict.py # Prediction script
+├── models/
+│ └── random_forest_model.pkl # Trained model
+├── README.md # This file
+└── requirements.txt # Python dependencies
