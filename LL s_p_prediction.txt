@@ -1,0 +1,24 @@
+ # Convert scholarship percentages to numerical values
+ def clean_scholarship(value):
+     if value == 'None':
+         return 0
+     return int(value.replace('%', ''))
+ 
+ df['Scholarship'] = df['Scholarship'].apply(clean_scholarship)
+ 
+ # Handle age ranges (convert to numerical)
+ df['Student_Age'] = df['Student_Age'].apply(lambda x: x.split('-')[0] if '-' in x else x).astype(int)
+ 
+ # Convert Weekly_Study_Hours to numerical
+ df['Weekly_Study_Hours'] = pd.to_numeric(df['Weekly_Study_Hours'], errors='coerce').fillna(0)
+ 
+ # Data Exploration
+ print("Dataset Shape:", df.shape)
+ print("\nMissing Values:")
+ print(df.isnull().sum())
+ 
+ # Visualize grade distribution
+ plt.figure(figsize=(10, 6))
+ sns.countplot(x='Grade', data=df, order=df['Grade'].value_counts().index)
+ plt.title('Grade Distribution')
+ plt.show()
