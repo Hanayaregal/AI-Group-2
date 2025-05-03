@@ -1,8 +1,8 @@
-##Student Performance Prediction
+## Student Performance Prediction
 
 This project analyzes student performance data and builds a machine learning model to predict academic grades based on various student characteristics and behaviors.
 
-##Dataset Overview
+## Dataset Overview
 The dataset contains information about 145 students with the following attributes:
 Student_ID: Unique identifier for each student
 Student_Age: Age group of the student (18, 19-22, 23-27)
@@ -22,6 +22,7 @@ Grade: Final academic grade (AA, BA, BB, CB, CC, DC, DD, Fail)
 
 ## Project Structure
 student-performance-prediction/
+
 ├── data/
 │ └── student_performance.csv # Raw dataset
 ├── notebooks/
